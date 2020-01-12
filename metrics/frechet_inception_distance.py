@@ -54,6 +54,8 @@ class FID(metric_base.MetricBase):
                 labels = self._get_random_labels_tf(self.minibatch_per_gpu)
                 images = Gs_clone.get_output_for(latents, labels, **Gs_kwargs)
                 images = tflib.convert_images_to_uint8(images)
+                if images.shape[1] == 1:
+                    images = np.tile(images, (1,3,1,1)) # grayscale to RGB
                 result_expr.append(inception_clone.get_output_for(images))
 
         # Calculate statistics for fakes.
