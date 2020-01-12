@@ -127,6 +127,8 @@ class MetricBase:
             images, _labels = dataset_obj.get_minibatch_np(minibatch_size)
             if self._mirror_augment:
                 images = misc.apply_mirror_augment(images)
+            if images.shape[1] == 1:
+                images = np.tile(images, (1,3,1,1)) # grayscale to RGB
             yield images
 
     def _iterate_fakes(self, Gs, minibatch_size, num_gpus):
@@ -134,6 +136,8 @@ class MetricBase:
             latents = np.random.randn(minibatch_size, *Gs.input_shape[1:])
             fmt = dict(func=tflib.convert_images_to_uint8, nchw_to_nhwc=True)
             images = Gs.run(latents, None, output_transform=fmt, is_validation=True, num_gpus=num_gpus, assume_frozen=True)
+            if images.shape[1] == 1:
+                images = np.tile(images, (1,3,1,1)) # grayscale to RGB
             yield images
 
     def _get_random_labels_tf(self, minibatch_size):
